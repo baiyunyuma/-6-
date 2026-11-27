@@ -1,0 +1,8 @@
+int32[] can_ids
+bool all
+bool sending
+---
+bool success
+string message
+int32[] sending_can_ids
+int32[] failed_can_ids

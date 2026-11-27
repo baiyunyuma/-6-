@@ -1,0 +1,27 @@
+# MoveIt FollowJointTrajectory -> /motor_driver 实机桥
+#
+# 安全默认值：重力/摩擦关闭。零位和关节方向标定好后再打开。
+# velocity_scale > 1 会让轨迹变慢（第一次上电建议 2.0~3.0）。
+traj_bridge:
+  ros__parameters:
+    joint_names: ["joint1", "joint2", "joint3", "joint4", "joint5", "joint6"]
+    # 软件关节限位（URDF 弧度）；超限轨迹直接拒绝，不交给驱动裁剪。
+    joint_lower: [-2.6179939, 0.0, -3.1415927, -1.5707963, -1.5707963, -6.2831853]
+    joint_upper: [2.6179939, 3.0543262, 0.0, 1.5707963, 1.5707963, 6.2831853]
+    command_topic: "/arm_joint_goal"
+
+    kp: 5.0
+    kd: 0.8
+
+    gravity: false
+    gravity_scale: 1.0
+    friction: false
+    coulomb: 0.10
+    viscous: 0.05
+    friction_slope: 100.0
+
+    velocity_scale: 1.0
+    feedback_rate: 10.0
+    feedback_timeout: 0.5
+    completion_timeout: 5.0
+    position_tolerance: 0.05

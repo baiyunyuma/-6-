@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# ROS 2 / colcon build artifacts
+ros2/build/
+ros2/install/
+ros2/log/
+
+# Logs and temp
+*.log
+/tmp/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local secrets (never commit)
+.env
+.env.*

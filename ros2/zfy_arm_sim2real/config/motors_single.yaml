@@ -1,0 +1,36 @@
+# 单电机台架：只有 CAN 0x01 的 DM4340P
+motor_driver:
+  ros__parameters:
+    sim: false
+    canfd: false
+    nom_baud: 1000000
+    dat_baud: 1000000
+    set_baudrate: true
+    device_index: 0
+    device_type: single
+
+    hmi_py_path: ""
+
+    joint_names: ["joint1"]
+    can_ids: [1]
+    mst_ids: [1]
+    models: ["4340"]
+    channels: [0]
+
+    # 软件关节限位（URDF 弧度，对应 J1）
+    joint_lower: [-2.6179939]
+    joint_upper: [2.6179939]
+
+    joint_signs: [1.0]
+    joint_offsets: [0.0]
+
+    hold_kp: [5.0]
+    hold_kd: [0.3]
+
+    control_rate: 250.0
+    state_rate: 100.0
+    command_timeout: 0.3
+    feedback_timeout: 0.5
+    state_refresh_period: 0.5
+    clear_error_before_enable: true
+    force_mode_write: false

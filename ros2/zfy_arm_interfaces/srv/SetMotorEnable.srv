@@ -1,0 +1,8 @@
+int32[] can_ids
+bool all
+bool enable
+---
+bool success
+string message
+int32[] enabled_can_ids
+int32[] failed_can_ids

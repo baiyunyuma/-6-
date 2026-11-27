@@ -1,0 +1,7 @@
+MotorRegistryEntry[] motors
+bool apply
+---
+bool success
+string message
+string[] joint_names
+int32[] can_ids

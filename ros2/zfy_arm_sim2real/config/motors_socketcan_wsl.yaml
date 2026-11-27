@@ -1,0 +1,71 @@
+# ZFY 六轴臂：gs_usb 固件 + Linux SocketCAN
+#
+# 前提：
+#   1. USB2CANFD 已刷 dm_usb2canfd_gsusb_1003.enc
+#   2. 接口已配置并启用（把 canX 换成实际名字）：
+#        sudo ip link set canX type can bitrate 1000000
+#        sudo ip link set canX up
+#
+# ⚠ Jetson 上板载 mttcan 已经占用了 can0。刷 gs_usb 固件后 USB2CANFD
+#   通常出现在 can1，务必先用 `ip -d link show` 确认 driver 是 gs_usb，
+#   再把下面的 can_channel 改对。绑定到 mttcan 会“发得出去但电机没反应”。
+#   驱动还会在连接时校验 /sys/class/net/<接口>/device/driver == gs_usb。
+#
+# 厂商 USB SDK / 旧 Qt 上位机不再参与；ROS 接口与 vendor 后端完全一致。
+motor_driver:
+  ros__parameters:
+    sim: false
+    backend: socketcan
+    # 单路 gs_usb 模块在 Jetson 上通常是 can1（can0 被板载 mttcan 占用）。
+    # 以 `ip -d link show type can` 为准；绑错驱动会直接报错。
+    can_channel: "can0"
+    can_channels: ["can0"]
+    can_bitrate: 1000000
+
+    # 以下字段保留给旧的 vendor 后端/工具，SocketCAN 后端只使用 bitrate
+    canfd: false
+    nom_baud: 1000000
+    dat_baud: 1000000
+    set_baudrate: false
+    device_index: 0
+    device_type: single
+
+    hmi_py_path: ""
+
+    joint_names: ["joint1", "joint2", "joint3", "joint4", "joint5", "joint6"]
+    # can_ids = 控制 ID（ESC_ID / RID 8）：主机发送使能/MIT/参数帧时寻址用。
+    # mst_ids = 反馈 ID（MST_ID / RID 7）：电机回传 /joint_states 用。
+    # 两者可以不同，必须与电机内部保存的 ESC_ID / MST_ID 完全一致。
+    can_ids: [17, 18, 19, 20, 21, 22]   # 0x11 .. 0x16
+    mst_ids: [1, 2, 3, 4, 5, 6]         # 0x01 .. 0x06
+    models: ["4340", "4340", "4340", "4310", "4310", "4310"]
+    channels: [0, 0, 0, 0, 0, 0]
+
+    # 软件关节限位（URDF 弧度，必须 ≤ 机械限位）。可在 arm_hmi「关节」页收窄，
+    # 驱动会在关节目标、伺服、单轴 MIT、外部 /mit_command 等所有路径裁剪。
+    joint_lower: [-2.6179939, 0.0, -3.1415927, -1.5707963, -1.5707963, -6.2831853]
+    joint_upper: [2.6179939, 3.0543262, 0.0, 1.5707963, 1.5707963, 6.2831853]
+
+    # 电机正方向与 URDF 正方向一致填 +1，反向填 -1
+    # J1/J3 正向，J2/J4/J5/J6 实测方向相反
+    joint_signs: [1.0, -1.0, 1.0, -1.0, -1.0, -1.0]
+    # 当前所有关节按 1:1 映射，不使用额外传动比
+    joint_scales: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    # 每关节重力前馈微调：J4 先加 10%，可在线 ros2 param set 调整
+    gravity_gains: [1.0, 1.0, 1.0, 1.10, 1.0, 1.0]
+    gravity_biases: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    # fold 位姿时的原始电机角度；当前 fold 即 0 点，保持 0
+    joint_offsets: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+    hold_kp: [5.0, 5.0, 5.0, 5.0, 5.0, 5.0]
+    hold_kd: [0.3, 0.3, 0.3, 0.3, 0.3, 0.3]
+
+    control_rate: 250.0
+    state_rate: 100.0
+    command_timeout: 0.3
+    feedback_timeout: 0.5
+    feedback_release_timeout: 1.0
+    max_joint_velocity: 3.5
+    state_refresh_period: 0.1
+    clear_error_before_enable: true
+    force_mode_write: false

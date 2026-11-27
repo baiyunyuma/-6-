@@ -1,0 +1,7 @@
+int32 can_id
+int32 rid
+---
+bool success
+string message
+float64 value
+bool is_integer

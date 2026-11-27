@@ -1,0 +1,40 @@
+# 台架：只有 CAN 0x01 和 0x02 两台电机（型号按 6 轴表前两轴，DM4340）
+motor_driver:
+  ros__parameters:
+    sim: false
+    canfd: false
+    nom_baud: 1000000
+    dat_baud: 1000000
+    # 适配器已配置为 1 Mbps 经典 CAN；每次打开重配会把 RX 路径搞坏（0xCC 无回复）
+    set_baudrate: false
+    device_index: 0
+    device_type: single
+
+    hmi_py_path: ""
+
+    joint_names: ["joint1", "joint2"]
+    can_ids: [1, 2]
+    mst_ids: [1, 2]
+    models: ["4340", "4340"]
+    channels: [0, 0]
+
+    # 软件关节限位（URDF 弧度，对应 J1/J2）
+    joint_lower: [-2.6179939, 0.0]
+    joint_upper: [2.6179939, 3.0543262]
+
+    joint_signs: [1.0, 1.0]
+    joint_offsets: [0.0, 0.0]
+
+    hold_kp: [5.0, 5.0]
+    hold_kd: [0.3, 0.3]
+
+    control_rate: 250.0
+    state_rate: 100.0
+    command_timeout: 0.3
+    feedback_timeout: 0.5
+    feedback_release_timeout: 1.0
+    max_joint_velocity: 3.5
+    state_refresh_period: 0.1
+    # 使能前先发 0xFB 清故障，台架调试方便
+    clear_error_before_enable: true
+    force_mode_write: false

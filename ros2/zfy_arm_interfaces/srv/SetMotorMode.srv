@@ -1,0 +1,6 @@
+int32 can_id
+string mode
+---
+bool success
+string message
+string actual_mode

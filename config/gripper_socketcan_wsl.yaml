@@ -1,0 +1,59 @@
+# ZFY 夹爪单电机驱动（独立于 6 轴臂 motor_driver）
+#
+# ⚠ 下面 q_min/q_max/open_q/close_q/close_direction 都是占位值，
+#   必须按夹爪实物和电机安装方向改，否则可能撞机械限位。
+#
+# 单路模块：can0 同时接 6 轴臂 + 夹爪 J7（CAN ID 7）。
+# 夹爪直接绑 can0，CAN ID 7；arm 的 motor_driver 也绑 can0，两个节点各开一个 CAN_RAW socket，互不干扰。
+# 单路 USB 模块下 can_channel 必须是 can0。
+gripper_driver:
+  ros__parameters:
+    sim: false
+    hmi_py_path: ""
+    can_channel: "can0"
+    can_bitrate: 1000000
+
+    name: "gripper"
+    # can_id = 控制 ID（ESC_ID / RID 8）；mst_id = 反馈 ID（MST_ID / RID 7）
+    can_id: 23      # 0x17
+    mst_id: 7       # 0x07
+    model: "4310"          # DM4310 / DM4340 / DM6006 ...
+    channel: 0             # gripper 节点内部的逻辑通道 0 -> can_channel(can1)
+
+    # ---- 夹爪行程（电机原始弧度，实测值）----
+    # 张开时停在 ~0.09，闭合止位 ~1.154。
+    q_min: -0.2
+    q_max: 1.5
+    open_q: 0.0
+    close_q: 1.2
+    close_direction: 1.0   # +1 = q 增大为闭合；-1 = q 减小为闭合
+
+    # ---- MIT 刚度 ----
+    kp_low: 40.0           # 自适应闭合阶段：低刚度
+    kd_low: 1.5
+    kp_high: 50.0          # 夹住后：高刚度保持
+    kd_high: 2.0
+
+    # ---- 自适应抓取 ----
+    close_speed: 0.60      # rad/s，闭合速度
+    max_travel: 1.0        # rad，从起始位置最多走这么远
+    min_travel: 0.02       # rad，至少走这么远才允许判定接触
+    contact_tau: 4.0       # N·m，接触力矩阈值（始终启用）
+    # <= 0 关闭位置误差判据，只用力矩判据。
+    # 低刚度时正常跟随误差就能顶到 0.05 rad，与阈值同量级会误判"接触"，
+    # 所以先关掉，只靠力矩判断。
+    contact_pos_err: 0.0   # rad，位置误差阈值；0 = 关闭
+    contact_vel: 0.02      # rad/s，速度阈值
+    contact_hold_time: 0.15  # 判据需连续成立这么久才算接触
+    settle_time: 0.20
+    timeout: 6.0
+    position_tolerance: 0.01
+
+    # 单路 can0 上 6 轴(250 Hz)+J7 共用，先用 250 Hz 降低总线负载；
+    # 500 Hz 的接触检测分辨率约 2 ms。需要更快可到 1000 Hz。
+    control_rate: 250.0
+    feedback_timeout: 0.5
+
+    # ---- 抓取结果保存 ----
+    auto_save: true
+    save_path: "~/.config/zfy_arm/gripper_grasp.json"

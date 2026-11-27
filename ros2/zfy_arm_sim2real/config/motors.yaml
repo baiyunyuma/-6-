@@ -1,0 +1,39 @@
+motor_driver:
+  ros__parameters:
+    # true = 不打开 CAN，用 MotorBus 的一阶模型出反馈，适合先把 ROS 2 链路跑通
+    sim: true
+    canfd: false
+    nom_baud: 1000000
+    dat_baud: 1000000
+    set_baudrate: true
+    device_index: 0
+    device_type: single
+
+    # 留空时自动向上查找 Zfy_Arm_real_control/py；部署到别处时填绝对路径
+    hmi_py_path: ""
+
+    joint_names: ["joint1", "joint2", "joint3", "joint4", "joint5", "joint6"]
+    can_ids: [1, 2, 3, 4, 5, 6]
+    mst_ids: [1, 2, 3, 4, 5, 6]
+    models: ["4340", "4340", "4340", "4310", "4310", "4310"]
+    channels: [0, 0, 0, 0, 0, 0]
+
+    # 软件关节限位（URDF 弧度，必须 ≤ 机械限位）
+    joint_lower: [-2.6179939, 0.0, -3.1415927, -1.5707963, -1.5707963, -6.2831853]
+    joint_upper: [2.6179939, 3.0543262, 0.0, 1.5707963, 1.5707963, 6.2831853]
+
+    # 使能后、以及指令超时后使用的保持增益（N·m/rad, N·m·s/rad）
+    # 初值沿用上位机 config.json 的 5 / 0.3，实机必须逐关节重调
+    hold_kp: [5.0, 5.0, 5.0, 5.0, 5.0, 5.0]
+    hold_kd: [0.3, 0.3, 0.3, 0.3, 0.3, 0.3]
+
+    control_rate: 250.0
+    state_rate: 100.0
+    command_timeout: 0.3
+    feedback_timeout: 0.5
+    # 任一关节反馈持续超过该时间：零力矩并失能
+    feedback_release_timeout: 1.0
+    # 相邻指令的最大关节速度（rad/s）。拦住单帧跳变；0 表示不限制
+    max_joint_velocity: 3.5
+    # 未发送 MIT 时用 0xCC 查询状态的周期，保证 /joint_states 仍然更新
+    state_refresh_period: 0.5

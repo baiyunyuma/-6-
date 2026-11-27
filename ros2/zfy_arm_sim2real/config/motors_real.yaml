@@ -1,0 +1,47 @@
+motor_driver:
+  ros__parameters:
+    sim: false
+    canfd: false
+    nom_baud: 1000000
+    dat_baud: 1000000
+    set_baudrate: true
+    device_index: 0
+    device_type: single
+
+    hmi_py_path: ""
+
+    joint_names: ["joint1", "joint2", "joint3", "joint4", "joint5", "joint6"]
+    can_ids: [1, 2, 3, 4, 5, 6]
+    mst_ids: [1, 2, 3, 4, 5, 6]
+    models: ["4340", "4340", "4340", "4310", "4310", "4310"]
+    channels: [0, 0, 0, 0, 0, 0]
+
+    # 软件关节限位（URDF 弧度，必须 ≤ 机械限位）
+    joint_lower: [-2.6179939, 0.0, -3.1415927, -1.5707963, -1.5707963, -6.2831853]
+    joint_upper: [2.6179939, 3.0543262, 0.0, 1.5707963, 1.5707963, 6.2831853]
+
+    # 电机正方向与 URDF 正方向一致填 +1，反向填 -1。
+    # 先在 MuJoCo 镜像窗口里拖拽实测，再改这里重启驱动。
+    # J1/J3 正向，J2/J4/J5/J6 实测方向相反
+    joint_signs: [1.0, -1.0, 1.0, -1.0, -1.0, -1.0]
+    # 当前所有关节按 1:1 映射，不使用额外传动比
+    joint_scales: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    # 每关节重力前馈微调：J4 先加 10%，可在线 ros2 param set 调整
+    gravity_gains: [1.0, 1.0, 1.0, 1.10, 1.0, 1.0]
+    gravity_biases: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    # 机械臂摆到 fold 位姿时读到的**原始电机角度**（rad），填进来后
+    # /joint_states 的 fold 就是全零。先保持 0，读一次再回填。
+    joint_offsets: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+    hold_kp: [5.0, 5.0, 5.0, 5.0, 5.0, 5.0]
+    hold_kd: [0.3, 0.3, 0.3, 0.3, 0.3, 0.3]
+
+    control_rate: 250.0
+    state_rate: 100.0
+    command_timeout: 0.3
+    feedback_timeout: 0.5
+    feedback_release_timeout: 1.0
+    max_joint_velocity: 3.5
+    # 手拖镜像时 0xCC 查询要够快；6 轴 x 33 Hz 仍在 1 Mbps 总线上。
+    # 只做常规控制、不需要手拖时，可以改回 0.5 降低总线占用。
+    state_refresh_period: 0.03

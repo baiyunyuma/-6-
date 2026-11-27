@@ -1,0 +1,23 @@
+---
+bool success
+string message
+int32[] can_ids
+string[] modes
+float64[] q
+float64[] dq
+float64[] tau
+int32[] err
+float64[] age
+bool enabled
+bool sending
+string[] joint_names
+int32[] joint_indices
+int32[] mst_ids
+string[] models
+int32[] channels
+float64[] signs
+float64[] offsets
+bool[] enabled_each
+bool[] sending_each
+bool[] zero_torque_each
+float64[] hold_q
